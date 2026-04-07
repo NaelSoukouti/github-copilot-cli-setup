@@ -5,7 +5,8 @@
 
 .DESCRIPTION
     Installs and configures GitHub Copilot tooling for .NET developers on Windows.
-    Includes: Visual Studio Code, GitHub CLI (with built-in Copilot CLI), and VS Code extensions.
+    Includes: Visual Studio Code, GitHub CLI (with built-in Copilot CLI), VS Code extensions,
+    and a standalone 'copilot' PowerShell alias so you can run 'copilot suggest ...' directly.
     Does NOT require Node.js.
 
 .NOTES
@@ -163,7 +164,43 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # ---------------------------------------------------------------------------
-# Step 6: Install VS Code Extensions
+# Step 6: Register standalone 'copilot' alias in PowerShell profile
+# ---------------------------------------------------------------------------
+
+Write-Step "Registering standalone 'copilot' command..."
+
+$profileDir = Split-Path -Parent $PROFILE
+if (-not (Test-Path $profileDir)) {
+    New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+}
+
+if (-not (Test-Path $PROFILE)) {
+    New-Item -ItemType File -Path $PROFILE -Force | Out-Null
+}
+
+$profileContent = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
+$aliasMarker    = "# gh-copilot-alias"
+
+if ($profileContent -match [regex]::Escape($aliasMarker)) {
+    Write-Ok "'copilot' alias already registered in PowerShell profile."
+} else {
+    $aliasBlock = @"
+
+$aliasMarker
+function copilot { gh copilot @args }
+"@
+    Add-Content -Path $PROFILE -Value $aliasBlock
+    Write-Ok "'copilot' alias added to: $PROFILE"
+    Write-Warn "Restart your terminal (or run '. `$PROFILE') to activate the alias."
+}
+
+# Make alias available immediately in this session
+if (-not (Get-Command copilot -ErrorAction SilentlyContinue)) {
+    function global:copilot { gh copilot @args }
+}
+
+# ---------------------------------------------------------------------------
+# Step 7: Install VS Code Extensions
 # ---------------------------------------------------------------------------
 
 Write-Step "Checking VS Code extensions for GitHub Copilot..."
@@ -192,7 +229,7 @@ foreach ($ext in $requiredExtensions) {
 }
 
 # ---------------------------------------------------------------------------
-# Step 7: Final Verification
+# Step 8: Final Verification
 # ---------------------------------------------------------------------------
 
 Write-Step "Running final verification..."
@@ -221,8 +258,9 @@ Write-Host "#                                                      #" -Foregroun
 Write-Host "########################################################" -ForegroundColor DarkGreen
 Write-Host ""
 Write-Host "  Quick start commands:" -ForegroundColor White
-Write-Host "    gh copilot suggest `"create a .NET Web API controller`"" -ForegroundColor DarkYellow
-Write-Host "    gh copilot explain `"git rebase -i HEAD~3`"" -ForegroundColor DarkYellow
+Write-Host "    copilot suggest `"create a .NET Web API controller`"" -ForegroundColor DarkYellow
+Write-Host "    copilot explain `"git rebase -i HEAD~3`"" -ForegroundColor DarkYellow
+Write-Host "    gh copilot suggest ... (also works)" -ForegroundColor DarkYellow
 Write-Host "    code .        (open current folder in VS Code)" -ForegroundColor DarkYellow
 Write-Host ""
 Write-Host "  Happy coding!" -ForegroundColor Green
