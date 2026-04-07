@@ -17,8 +17,9 @@ This repository contains a single PowerShell script — `setup-copilot-dev.ps1` 
 |---|---|---|
 | **Visual Studio Code** | Primary editor with Copilot integration | winget |
 | **GitHub CLI (`gh`)** | GitHub operations from the terminal | winget |
-| **GitHub Copilot CLI** | AI suggestions in the terminal (`gh copilot`) | Built-in since gh v2.64.0 |
-| **`copilot` alias** | Shorthand for `gh copilot` in PowerShell | Registered in `$PROFILE` |
+| **`gh copilot` subcommand** | Quick command suggestions & explanations | Built-in since gh v2.64.0 |
+| **GitHub Copilot CLI** | Full interactive AI agent in the terminal (`copilot`) | winget (`GitHub.Copilot`) |
+| **`suggest` alias** | Shorthand for `gh copilot suggest` in PowerShell | Registered in `$PROFILE` |
 | **GitHub Copilot** (VS Code) | Inline AI code completions | code --install-extension |
 | **GitHub Copilot Chat** (VS Code) | Conversational AI in the editor sidebar | code --install-extension |
 
@@ -99,17 +100,20 @@ gh --version
 # Check GitHub authentication
 gh auth status
 
-# Test Copilot CLI (built-in — no extension required)
+# Check gh copilot subcommand (built-in — no extension required)
 gh copilot --help
 
-# Suggest a command using natural language (via alias)
-copilot suggest "create a .NET Web API controller"
+# Launch the full interactive Copilot agent (chat experience)
+copilot
+
+# Quick one-liner suggestion (via alias)
+suggest "create a .NET Web API controller"
 
 # Or using gh directly
 gh copilot suggest "create a .NET Web API controller"
 
 # Explain a command
-copilot explain "git rebase -i HEAD~3"
+gh copilot explain "git rebase -i HEAD~3"
 
 # List installed VS Code extensions (filter for Copilot)
 code --list-extensions | Select-String copilot
@@ -186,10 +190,11 @@ dev-setup/
 | 2 | Install **Visual Studio Code** if not present |
 | 3 | Install **GitHub CLI** if not present |
 | 4 | Authenticate with GitHub (`gh auth login`) if not already logged in |
-| 5 | Verify **`gh copilot`** is available (built-in since gh v2.64.0) |
-| 6 | Register a standalone **`copilot` alias** in your PowerShell `$PROFILE` |
-| 7 | Install **GitHub Copilot** and **GitHub Copilot Chat** VS Code extensions |
-| 8 | Run a final verification and print a success summary |
+| 5 | Verify **`gh copilot`** subcommand is available (built-in since gh v2.64.0) |
+| 6 | Install **GitHub Copilot CLI** — the full interactive terminal agent (`copilot`) |
+| 7 | Register a **`suggest` alias** in your PowerShell `$PROFILE` for quick one-liners |
+| 8 | Install **GitHub Copilot** and **GitHub Copilot Chat** VS Code extensions |
+| 9 | Run a final verification and print a success summary |
 
 ---
 
@@ -200,7 +205,7 @@ dev-setup/
 3. Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
 4. Run `.\setup-copilot-dev.ps1`
 5. Follow the GitHub login prompts if prompted
-6. Start using `copilot suggest` / `copilot explain` in the terminal and GitHub Copilot inside VS Code
+6. Run `copilot` to open the full interactive Copilot agent, or `suggest "..."` for quick one-liners, and use GitHub Copilot inside VS Code
 
 ---
 

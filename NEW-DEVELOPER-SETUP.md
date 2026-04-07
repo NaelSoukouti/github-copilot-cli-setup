@@ -90,10 +90,11 @@ The script will:
 2. Check if **Visual Studio Code** is installed — install it if not
 3. Check if **GitHub CLI** is installed — install it if not
 4. Check if you are **logged in to GitHub** — prompt you to log in if not
-5. Verify the **Copilot CLI** is available (`gh copilot` is built into gh v2.64.0+)
-6. Register a standalone **`copilot` alias** in your PowerShell profile so you can type `copilot suggest ...` directly
-7. Check if **VS Code Copilot extensions** are installed — install them if not
-8. Run a **final verification** and print a success message
+5. Verify the **`gh copilot` subcommand** is available (built-in since gh v2.64.0+)
+6. Install the **GitHub Copilot CLI** — the full interactive terminal agent (just type `copilot` to start)
+7. Register a **`suggest` alias** in your PowerShell profile for quick one-liner suggestions
+8. Check if **VS Code Copilot extensions** are installed — install them if not
+9. Run a **final verification** and print a success message
 
 ---
 
@@ -143,8 +144,9 @@ Once done, the terminal will confirm:
 |---|---|
 | **Visual Studio Code** | Code editor with built-in Copilot support |
 | **GitHub CLI (`gh`)** | Interact with GitHub from the terminal |
-| **Copilot CLI** (`gh copilot`) | Ask Copilot for terminal command suggestions — built into gh v2.64.0+ |
-| **`copilot` alias** | Shorthand: type `copilot suggest ...` instead of `gh copilot suggest ...` |
+| **`gh copilot` subcommand** | Quick command suggestions & explanations — built into gh v2.64.0+ |
+| **GitHub Copilot CLI** | Full interactive AI agent in your terminal — just type `copilot` to start a chat |
+| **`suggest` alias** | Shorthand: type `suggest "..."` instead of `gh copilot suggest "..."` |
 | **GitHub Copilot** (VS Code extension) | Inline AI code completions while you type |
 | **GitHub Copilot Chat** (VS Code extension) | Chat with Copilot in the VS Code sidebar |
 
@@ -164,26 +166,29 @@ gh --version
 # Check you're logged in
 gh auth status
 
-# Test the Copilot CLI (built-in — no extension needed)
+# Check the gh copilot subcommand (built-in — no extension needed)
 gh copilot --help
 ```
 
-**Try your first Copilot CLI command using the `copilot` alias:**
+**Launch the full interactive Copilot agent (chat experience):**
 
 ```powershell
-copilot suggest "create a .NET Web API controller"
+copilot
 ```
 
-**Or use `gh copilot` directly — both work:**
+This opens an interactive session — just like having a conversation with an AI developer. You can ask it to write code, explain errors, edit files, run commands, and more.
+
+**For quick one-liner suggestions, use the `suggest` alias:**
+
+```powershell
+suggest "create a .NET Web API controller"
+```
+
+**Or use `gh copilot` directly:**
 
 ```powershell
 gh copilot suggest "create a .NET Web API controller"
-```
-
-**Try explaining a command:**
-
-```powershell
-copilot explain "dotnet ef migrations add InitialCreate"
+gh copilot explain "dotnet ef migrations add InitialCreate"
 ```
 
 ---
@@ -207,8 +212,9 @@ copilot explain "dotnet ef migrations add InitialCreate"
 | **Admin rights** | Not required in most cases. winget installs to user scope by default. |
 | **Time to complete** | Approximately 5–15 minutes depending on internet speed. |
 | **Re-running the script** | Safe to run multiple times. It skips anything already installed. |
-| **`copilot` alias** | The script registers `function copilot { gh copilot @args }` in your `$PROFILE`. Restart your terminal once after setup to activate it. |
-| **Copilot subscription** | Required for `copilot suggest` and in-editor completions. The free GitHub account is not enough on its own. |
+| **`suggest` alias** | The script registers `function suggest { gh copilot suggest @args }` in your `$PROFILE`. Restart your terminal once after setup to activate it. |
+| **`copilot` command** | The full interactive GitHub Copilot CLI agent — installed as a standalone binary. Type `copilot` to start a chat session. |
+| **Copilot subscription** | Required for `copilot`, `suggest`, and in-editor completions. The free GitHub account is not enough on its own. |
 
 ---
 

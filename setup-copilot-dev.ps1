@@ -5,8 +5,8 @@
 
 .DESCRIPTION
     Installs and configures GitHub Copilot tooling for .NET developers on Windows.
-    Includes: Visual Studio Code, GitHub CLI (with built-in Copilot CLI), VS Code extensions,
-    and a standalone 'copilot' PowerShell alias so you can run 'copilot suggest ...' directly.
+    Includes: Visual Studio Code, GitHub CLI, GitHub Copilot CLI (full interactive
+    terminal agent), VS Code extensions, and a 'suggest' alias for quick one-liners.
     Does NOT require Node.js.
 
 .NOTES
@@ -148,15 +148,14 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # ---------------------------------------------------------------------------
-# Step 5: Verify GitHub Copilot CLI (built-in since gh v2.64.0)
+# Step 5: Verify gh copilot subcommand (built-in since gh v2.64.0)
 # ---------------------------------------------------------------------------
 
-Write-Step "Checking for GitHub Copilot CLI..."
+Write-Step "Checking for gh copilot subcommand..."
 
-# gh copilot is a built-in command as of gh v2.64.0 — no extension needed.
 $copilotHelp = gh copilot --help 2>&1
 if ($LASTEXITCODE -eq 0) {
-    Write-Ok "GitHub Copilot CLI is available (built into gh)."
+    Write-Ok "'gh copilot' subcommand is available."
 } else {
     Write-Host "  [ERROR] 'gh copilot' is not available. Please upgrade GitHub CLI to v2.64.0 or later." -ForegroundColor Red
     Write-Host "          Run: winget upgrade --id GitHub.cli" -ForegroundColor Yellow
@@ -164,10 +163,36 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # ---------------------------------------------------------------------------
-# Step 6: Register standalone 'copilot' alias in PowerShell profile
+# Step 6: Install GitHub Copilot CLI (full interactive terminal agent)
 # ---------------------------------------------------------------------------
 
-Write-Step "Registering standalone 'copilot' command..."
+Write-Step "Checking for GitHub Copilot CLI (full interactive agent)..."
+
+$copilotPath = Get-Command copilot -ErrorAction SilentlyContinue
+
+if ($copilotPath) {
+    Write-Ok "GitHub Copilot CLI is already installed: $($copilotPath.Source)"
+} else {
+    Write-Warn "GitHub Copilot CLI not found. Installing via winget..."
+    winget install --id GitHub.Copilot -e --source winget --accept-package-agreements --accept-source-agreements
+
+    # Refresh PATH
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" +
+                [System.Environment]::GetEnvironmentVariable("PATH", "User")
+
+    if (Get-Command copilot -ErrorAction SilentlyContinue) {
+        Write-Ok "GitHub Copilot CLI installed successfully."
+    } else {
+        Write-Warn "GitHub Copilot CLI installed but 'copilot' command not yet on PATH."
+        Write-Warn "Restart your terminal, then run 'copilot' to launch the interactive agent."
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Step 7: Register 'suggest' alias for quick gh copilot one-liners
+# ---------------------------------------------------------------------------
+
+Write-Step "Registering 'suggest' shortcut for quick command suggestions..."
 
 $profileDir = Split-Path -Parent $PROFILE
 if (-not (Test-Path $profileDir)) {
@@ -179,28 +204,28 @@ if (-not (Test-Path $PROFILE)) {
 }
 
 $profileContent = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
-$aliasMarker    = "# gh-copilot-alias"
+$aliasMarker    = "# gh-copilot-suggest-alias"
 
 if ($profileContent -match [regex]::Escape($aliasMarker)) {
-    Write-Ok "'copilot' alias already registered in PowerShell profile."
+    Write-Ok "'suggest' alias already registered in PowerShell profile."
 } else {
     $aliasBlock = @"
 
 $aliasMarker
-function copilot { gh copilot @args }
+function suggest { gh copilot suggest @args }
 "@
     Add-Content -Path $PROFILE -Value $aliasBlock
-    Write-Ok "'copilot' alias added to: $PROFILE"
+    Write-Ok "'suggest' alias added to: $PROFILE"
     Write-Warn "Restart your terminal (or run '. `$PROFILE') to activate the alias."
 }
 
 # Make alias available immediately in this session
-if (-not (Get-Command copilot -ErrorAction SilentlyContinue)) {
-    function global:copilot { gh copilot @args }
+if (-not (Get-Command suggest -ErrorAction SilentlyContinue)) {
+    function global:suggest { gh copilot suggest @args }
 }
 
 # ---------------------------------------------------------------------------
-# Step 7: Install VS Code Extensions
+# Step 8: Install VS Code Extensions
 # ---------------------------------------------------------------------------
 
 Write-Step "Checking VS Code extensions for GitHub Copilot..."
@@ -229,7 +254,7 @@ foreach ($ext in $requiredExtensions) {
 }
 
 # ---------------------------------------------------------------------------
-# Step 8: Final Verification
+# Step 9: Final Verification
 # ---------------------------------------------------------------------------
 
 Write-Step "Running final verification..."
@@ -239,7 +264,11 @@ Write-Host "  -- VS Code Version --" -ForegroundColor Gray
 code --version
 
 Write-Host ""
-Write-Host "  -- GitHub Copilot CLI Help --" -ForegroundColor Gray
+Write-Host "  -- GitHub Copilot CLI Version --" -ForegroundColor Gray
+copilot --version 2>&1 | Select-Object -First 1
+
+Write-Host ""
+Write-Host "  -- gh copilot Subcommand Help --" -ForegroundColor Gray
 gh copilot --help
 
 Write-Host ""
@@ -258,10 +287,16 @@ Write-Host "#                                                      #" -Foregroun
 Write-Host "########################################################" -ForegroundColor DarkGreen
 Write-Host ""
 Write-Host "  Quick start commands:" -ForegroundColor White
-Write-Host "    copilot suggest `"create a .NET Web API controller`"" -ForegroundColor DarkYellow
-Write-Host "    copilot explain `"git rebase -i HEAD~3`"" -ForegroundColor DarkYellow
-Write-Host "    gh copilot suggest ... (also works)" -ForegroundColor DarkYellow
-Write-Host "    code .        (open current folder in VS Code)" -ForegroundColor DarkYellow
+Write-Host ""
+Write-Host "  Full interactive Copilot agent (this chat experience):" -ForegroundColor Gray
+Write-Host "    copilot                                              " -ForegroundColor DarkYellow
+Write-Host ""
+Write-Host "  Quick one-liner suggestions (no chat):" -ForegroundColor Gray
+Write-Host "    suggest `"create a .NET Web API controller`"          " -ForegroundColor DarkYellow
+Write-Host "    gh copilot explain `"git rebase -i HEAD~3`"           " -ForegroundColor DarkYellow
+Write-Host ""
+Write-Host "  Open current folder in VS Code:" -ForegroundColor Gray
+Write-Host "    code .                                               " -ForegroundColor DarkYellow
 Write-Host ""
 Write-Host "  Happy coding!" -ForegroundColor Green
 Write-Host ""
