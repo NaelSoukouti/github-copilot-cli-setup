@@ -90,9 +90,10 @@ The script will:
 2. Check if **Visual Studio Code** is installed — install it if not
 3. Check if **GitHub CLI** is installed — install it if not
 4. Check if you are **logged in to GitHub** — prompt you to log in if not
-5. Check if the **Copilot CLI extension** is installed — install it if not
-6. Check if **VS Code Copilot extensions** are installed — install them if not
-7. Run a **final verification** and print a success message
+5. Verify the **Copilot CLI** is available (`gh copilot` is built into gh v2.64.0+)
+6. Register a standalone **`copilot` alias** in your PowerShell profile so you can type `copilot suggest ...` directly
+7. Check if **VS Code Copilot extensions** are installed — install them if not
+8. Run a **final verification** and print a success message
 
 ---
 
@@ -142,7 +143,8 @@ Once done, the terminal will confirm:
 |---|---|
 | **Visual Studio Code** | Code editor with built-in Copilot support |
 | **GitHub CLI (`gh`)** | Interact with GitHub from the terminal |
-| **Copilot CLI** (`gh copilot`) | Ask Copilot for terminal command suggestions |
+| **Copilot CLI** (`gh copilot`) | Ask Copilot for terminal command suggestions — built into gh v2.64.0+ |
+| **`copilot` alias** | Shorthand: type `copilot suggest ...` instead of `gh copilot suggest ...` |
 | **GitHub Copilot** (VS Code extension) | Inline AI code completions while you type |
 | **GitHub Copilot Chat** (VS Code extension) | Chat with Copilot in the VS Code sidebar |
 
@@ -162,14 +164,17 @@ gh --version
 # Check you're logged in
 gh auth status
 
-# Check the Copilot CLI extension is installed
-gh extension list
-
-# Test the Copilot CLI
+# Test the Copilot CLI (built-in — no extension needed)
 gh copilot --help
 ```
 
-**Try your first Copilot CLI command:**
+**Try your first Copilot CLI command using the `copilot` alias:**
+
+```powershell
+copilot suggest "create a .NET Web API controller"
+```
+
+**Or use `gh copilot` directly — both work:**
 
 ```powershell
 gh copilot suggest "create a .NET Web API controller"
@@ -178,7 +183,7 @@ gh copilot suggest "create a .NET Web API controller"
 **Try explaining a command:**
 
 ```powershell
-gh copilot explain "dotnet ef migrations add InitialCreate"
+copilot explain "dotnet ef migrations add InitialCreate"
 ```
 
 ---
@@ -197,11 +202,13 @@ gh copilot explain "dotnet ef migrations add InitialCreate"
 
 | Topic | Detail |
 |---|---|
-| **Node.js** | Not required. This setup uses winget and gh extensions only. |
+| **Node.js** | Not required. This setup uses winget and built-in gh commands only. |
+| **gh extension** | Not required. `gh copilot` is built into GitHub CLI v2.64.0+. |
 | **Admin rights** | Not required in most cases. winget installs to user scope by default. |
 | **Time to complete** | Approximately 5–15 minutes depending on internet speed. |
 | **Re-running the script** | Safe to run multiple times. It skips anything already installed. |
-| **Copilot subscription** | Required for `gh copilot suggest` and in-editor completions. The free GitHub account is not enough on its own. |
+| **`copilot` alias** | The script registers `function copilot { gh copilot @args }` in your `$PROFILE`. Restart your terminal once after setup to activate it. |
+| **Copilot subscription** | Required for `copilot suggest` and in-editor completions. The free GitHub account is not enough on its own. |
 
 ---
 

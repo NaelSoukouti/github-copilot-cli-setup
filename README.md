@@ -17,11 +17,13 @@ This repository contains a single PowerShell script — `setup-copilot-dev.ps1` 
 |---|---|---|
 | **Visual Studio Code** | Primary editor with Copilot integration | winget |
 | **GitHub CLI (`gh`)** | GitHub operations from the terminal | winget |
-| **GitHub Copilot CLI** | AI suggestions in the terminal (`gh copilot`) | gh extension |
+| **GitHub Copilot CLI** | AI suggestions in the terminal (`gh copilot`) | Built-in since gh v2.64.0 |
+| **`copilot` alias** | Shorthand for `gh copilot` in PowerShell | Registered in `$PROFILE` |
 | **GitHub Copilot** (VS Code) | Inline AI code completions | code --install-extension |
 | **GitHub Copilot Chat** (VS Code) | Conversational AI in the editor sidebar | code --install-extension |
 
-> **Node.js is NOT required.** This setup works entirely through winget and the GitHub CLI extension system.
+> **Node.js is NOT required.** This setup works entirely through winget and the GitHub CLI.  
+> **No gh extension install needed.** `gh copilot` has been built into GitHub CLI since v2.64.0.
 
 ---
 
@@ -97,17 +99,17 @@ gh --version
 # Check GitHub authentication
 gh auth status
 
-# List installed gh extensions
-gh extension list
-
-# Test Copilot CLI
+# Test Copilot CLI (built-in — no extension required)
 gh copilot --help
 
-# Suggest a command using natural language
+# Suggest a command using natural language (via alias)
+copilot suggest "create a .NET Web API controller"
+
+# Or using gh directly
 gh copilot suggest "create a .NET Web API controller"
 
 # Explain a command
-gh copilot explain "git rebase -i HEAD~3"
+copilot explain "git rebase -i HEAD~3"
 
 # List installed VS Code extensions (filter for Copilot)
 code --list-extensions | Select-String copilot
@@ -119,7 +121,7 @@ code --list-extensions | Select-String copilot
 
 **This setup does not require Node.js.**
 
-The GitHub Copilot CLI extension (`gh-copilot`) is installed directly through the GitHub CLI extension system (`gh extension install`). There is no npm, npx, or Node.js dependency in this workflow.
+`gh copilot` is a built-in command in GitHub CLI v2.64.0 and later — no extension install, no npm, no npx, and no Node.js dependency. The script verifies your `gh` version supports it and exits with a clear upgrade message if not.
 
 ---
 
@@ -176,6 +178,19 @@ dev-setup/
 └── NEW-DEVELOPER-SETUP.md    # Step-by-step beginner onboarding guide
 ```
 
+## What the Script Does (Step by Step)
+
+| Step | Action |
+|---|---|
+| 1 | Verify **winget** is available |
+| 2 | Install **Visual Studio Code** if not present |
+| 3 | Install **GitHub CLI** if not present |
+| 4 | Authenticate with GitHub (`gh auth login`) if not already logged in |
+| 5 | Verify **`gh copilot`** is available (built-in since gh v2.64.0) |
+| 6 | Register a standalone **`copilot` alias** in your PowerShell `$PROFILE` |
+| 7 | Install **GitHub Copilot** and **GitHub Copilot Chat** VS Code extensions |
+| 8 | Run a final verification and print a success summary |
+
 ---
 
 ## Summary
@@ -185,8 +200,8 @@ dev-setup/
 3. Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
 4. Run `.\setup-copilot-dev.ps1`
 5. Follow the GitHub login prompts if prompted
-6. Start using `gh copilot suggest` and GitHub Copilot inside VS Code
+6. Start using `copilot suggest` / `copilot explain` in the terminal and GitHub Copilot inside VS Code
 
 ---
 
-*Maintained by the product team. Node.js not required.*
+*Maintained by the product team. Node.js not required. No gh extension install required.*
