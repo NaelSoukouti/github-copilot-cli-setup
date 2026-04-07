@@ -5,7 +5,7 @@
 
 .DESCRIPTION
     Installs and configures GitHub Copilot tooling for .NET developers on Windows.
-    Includes: Visual Studio Code, GitHub CLI, Copilot CLI extension, and VS Code extensions.
+    Includes: Visual Studio Code, GitHub CLI (with built-in Copilot CLI), and VS Code extensions.
     Does NOT require Node.js.
 
 .NOTES
@@ -147,25 +147,19 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # ---------------------------------------------------------------------------
-# Step 5: Install GitHub Copilot CLI Extension
+# Step 5: Verify GitHub Copilot CLI (built-in since gh v2.64.0)
 # ---------------------------------------------------------------------------
 
-Write-Step "Checking for GitHub Copilot CLI extension..."
+Write-Step "Checking for GitHub Copilot CLI..."
 
-$extensionList = gh extension list 2>&1
-if ($extensionList -match "gh-copilot") {
-    Write-Ok "GitHub Copilot CLI extension is already installed."
+# gh copilot is a built-in command as of gh v2.64.0 — no extension needed.
+$copilotHelp = gh copilot --help 2>&1
+if ($LASTEXITCODE -eq 0) {
+    Write-Ok "GitHub Copilot CLI is available (built into gh)."
 } else {
-    Write-Warn "Copilot CLI extension not found. Installing..."
-    gh extension install github/gh-copilot
-
-    $extensionList = gh extension list 2>&1
-    if ($extensionList -match "gh-copilot") {
-        Write-Ok "GitHub Copilot CLI extension installed successfully."
-    } else {
-        Write-Host "  [ERROR] Failed to install gh-copilot extension." -ForegroundColor Red
-        exit 1
-    }
+    Write-Host "  [ERROR] 'gh copilot' is not available. Please upgrade GitHub CLI to v2.64.0 or later." -ForegroundColor Red
+    Write-Host "          Run: winget upgrade --id GitHub.cli" -ForegroundColor Yellow
+    exit 1
 }
 
 # ---------------------------------------------------------------------------
